@@ -85,11 +85,7 @@ impl Position {
         let rooks_queens = self
             .pieces_of(by, PieceKind::Rook)
             .union(self.pieces_of(by, PieceKind::Queen));
-        if rook_attacks(square, occupied) & rooks_queens.0 != 0 {
-            return true;
-        }
-
-        false
+        rook_attacks(square, occupied) & rooks_queens.0 != 0
     }
 
     fn pseudo_legal_moves(&self) -> Vec<Move> {
