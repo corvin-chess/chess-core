@@ -36,4 +36,35 @@ impl Bitboard {
     pub const fn intersect(self, other: Bitboard) -> Bitboard {
         Bitboard(self.0 & other.0)
     }
+
+    /// Lowest set square, or `None` when empty.
+    pub fn first(self) -> Option<Square> {
+        if self.0 == 0 {
+            return None;
+        }
+        Square::from_index(self.0.trailing_zeros() as u8)
+    }
+
+    /// Iterates set squares from low index to high.
+    pub fn squares(self) -> Squares {
+        Squares { bits: self.0 }
+    }
+}
+
+/// Iterator over squares set in a bitboard.
+pub struct Squares {
+    bits: u64,
+}
+
+impl Iterator for Squares {
+    type Item = Square;
+
+    fn next(&mut self) -> Option<Square> {
+        if self.bits == 0 {
+            return None;
+        }
+        let index = self.bits.trailing_zeros() as u8;
+        self.bits &= self.bits - 1;
+        Square::from_index(index)
+    }
 }

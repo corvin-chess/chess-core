@@ -20,9 +20,10 @@ const LICENSE_ID = "AGPL-3.0-or-later"
 const CLOSING =
   "Rules without shortcuts: every legal move, every draw claim, every check."
 
-const BUILT_AREAS = /^(README|Crate scaffold|Board representation)$/i
+const BUILT_AREAS =
+  /^(README|Crate scaffold|Board representation|Legal move generation)$/i
 const PLANNED_AREAS =
-  /^(Legal move generation|FEN\/PGN\/SAN\/UCI|Perft suite|WASM \+ TS bindings|Implementation)$/i
+  /^(FEN\/PGN\/SAN\/UCI|Perft suite|WASM \+ TS bindings|Implementation)$/i
 
 const fail = (msg) => {
   console.error(`FAIL: ${msg}`)
@@ -154,6 +155,7 @@ if (!statusTableMatch) {
   let sawReadmeBuilt = false
   let sawScaffoldBuilt = false
   let sawBoardBuilt = false
+  let sawMovegenBuilt = false
   let sawImplPlanned = false
   for (const [, areaRaw, stateRaw] of stateCells) {
     const area = areaRaw.trim()
@@ -176,6 +178,9 @@ if (!statusTableMatch) {
     if (/^Board representation$/i.test(area) && /^Built$/i.test(state)) {
       sawBoardBuilt = true
     }
+    if (/^Legal move generation$/i.test(area) && /^Built$/i.test(state)) {
+      sawMovegenBuilt = true
+    }
     if (PLANNED_AREAS.test(area) && !/^Planned$/i.test(state)) {
       fail(`STATUS row "${area}" must stay Planned until code exists; got "${state}"`)
     }
@@ -186,6 +191,7 @@ if (!statusTableMatch) {
   if (!sawReadmeBuilt) fail('STATUS must include "| README | Built |"')
   if (!sawScaffoldBuilt) fail('STATUS must include "| Crate scaffold | Built |"')
   if (!sawBoardBuilt) fail('STATUS must include "| Board representation | Built |"')
+  if (!sawMovegenBuilt) fail('STATUS must include "| Legal move generation | Built |"')
   if (!sawImplPlanned) fail('STATUS must include "| Implementation | Planned |"')
   if (!process.exitCode) ok("STATUS rows use Planned/Built correctly")
 }
