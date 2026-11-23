@@ -55,4 +55,26 @@ impl Square {
     pub const fn rank(self) -> u8 {
         self.0 / 8
     }
+
+    /// Parse algebraic coordinates like `e4`. Returns `None` unless exactly two ASCII chars a-h + 1-8.
+    pub fn from_algebraic(s: &str) -> Option<Square> {
+        let bytes = s.as_bytes();
+        if bytes.len() != 2 {
+            return None;
+        }
+        let file = bytes[0].checked_sub(b'a')?;
+        let rank = bytes[1].checked_sub(b'1')?;
+        if file > 7 || rank > 7 {
+            return None;
+        }
+        Square::from_file_rank(file, rank)
+    }
+
+    /// Format as algebraic coordinates (`a1` .. `h8`).
+    pub fn to_algebraic(self) -> String {
+        let mut s = String::with_capacity(2);
+        s.push(char::from(b'a' + self.file()));
+        s.push(char::from(b'1' + self.rank()));
+        s
+    }
 }
