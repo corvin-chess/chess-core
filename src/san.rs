@@ -170,10 +170,7 @@ impl Position {
                     }
                 }
                 // `x` must mean a real capture (including en passant); quiet SAN must not use `x`.
-                if wants_capture != self.is_capture(*m) {
-                    return false;
-                }
-                true
+                wants_capture == self.is_capture(*m)
             })
             .collect();
 
