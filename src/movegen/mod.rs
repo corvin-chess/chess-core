@@ -269,7 +269,7 @@ impl Position {
 
     /// Applies a move that has already been validated as pseudo-legal for this side.
     /// Caller must still verify king safety when filtering.
-    fn apply_move_unchecked(&self, m: Move) -> Position {
+    pub(crate) fn apply_move_unchecked(&self, m: Move) -> Position {
         let us = self.side_to_move();
         let them = us.opposite();
         let mut next = self.clone();
