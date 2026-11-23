@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -21,6 +24,7 @@ jobs:
       - name: Clippy
         run: cargo clippy --locked --all-targets -- -D warnings
       - name: Test
-        run: cargo test --locked
+        # Release profile: CI perft depths (docs/perft-table.md) are heavy in debug.
+        run: cargo test --locked --release
       - name: Verify README
         run: node scripts/verify-readme.mjs
