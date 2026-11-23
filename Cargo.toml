@@ -14,5 +14,12 @@ publish = false
 [lib]
 name = "corvin_chess_core"
 path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+# Browser/Node bindings via wasm-bindgen (build with wasm-pack --features wasm).
+wasm = ["dep:wasm-bindgen"]
 
 [dependencies]
+wasm-bindgen = { version = "0.2", optional = true }

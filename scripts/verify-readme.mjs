@@ -21,9 +21,9 @@ const CLOSING =
   "Rules without shortcuts: every legal move, every draw claim, every check."
 
 const BUILT_AREAS =
-  /^(README|Crate scaffold|Board representation|Legal move generation|FEN load\/store|PGN\/SAN\/UCI|Draw helpers|Perft suite)$/i
+  /^(README|Crate scaffold|Board representation|Legal move generation|FEN load\/store|PGN\/SAN\/UCI|Draw helpers|Perft suite|WASM \+ TS bindings)$/i
 const PLANNED_AREAS =
-  /^(WASM \+ TS bindings|Implementation)$/i
+  /^(Implementation)$/i
 
 const fail = (msg) => {
   console.error(`FAIL: ${msg}`)
@@ -160,6 +160,7 @@ if (!statusTableMatch) {
   let sawNotationBuilt = false
   let sawDrawBuilt = false
   let sawPerftBuilt = false
+  let sawWasmBuilt = false
   let sawImplPlanned = false
   for (const [, areaRaw, stateRaw] of stateCells) {
     const area = areaRaw.trim()
@@ -197,6 +198,9 @@ if (!statusTableMatch) {
     if (/^Perft suite$/i.test(area) && /^Built$/i.test(state)) {
       sawPerftBuilt = true
     }
+    if (/^WASM \+ TS bindings$/i.test(area) && /^Built$/i.test(state)) {
+      sawWasmBuilt = true
+    }
     if (PLANNED_AREAS.test(area) && !/^Planned$/i.test(state)) {
       fail(`STATUS row "${area}" must stay Planned until code exists; got "${state}"`)
     }
@@ -212,6 +216,7 @@ if (!statusTableMatch) {
   if (!sawNotationBuilt) fail('STATUS must include "| PGN/SAN/UCI | Built |"')
   if (!sawDrawBuilt) fail('STATUS must include "| Draw helpers | Built |"')
   if (!sawPerftBuilt) fail('STATUS must include "| Perft suite | Built |"')
+  if (!sawWasmBuilt) fail('STATUS must include "| WASM + TS bindings | Built |"')
   if (!sawImplPlanned) fail('STATUS must include "| Implementation | Planned |"')
   if (!process.exitCode) ok("STATUS rows use Planned/Built correctly")
 }
@@ -233,6 +238,12 @@ if (!readme.includes("cargo test")) {
   fail("GETTING STARTED / TESTING must document cargo test")
 } else {
   ok("cargo test documented")
+}
+
+if (!readme.includes("wasm-pack") || !readme.includes("legalMoves")) {
+  fail("DEVELOPMENT / TESTING must document wasm-pack and legalMoves")
+} else {
+  ok("wasm-pack and legalMoves documented")
 }
 
 const linkRe = /https:\/\/github\.com\/corvin-chess\/([A-Za-z0-9._-]+)/g

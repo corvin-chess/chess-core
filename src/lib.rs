@@ -2,8 +2,13 @@
 //!
 //! Board representation, legal move generation, FEN load/store, notation helpers,
 //! draw-rule helpers (repetition, fifty-move, insufficient material), and perft.
+//! Optional WASM bindings live behind the `wasm` feature (`src/wasm.rs`).
 
-#![forbid(unsafe_code)]
+// wasm-bindgen glue uses unsafe; keep the native library forbid(unsafe_code).
+#![cfg_attr(
+    not(all(target_arch = "wasm32", feature = "wasm")),
+    forbid(unsafe_code)
+)]
 
 mod board;
 mod draw;
@@ -13,6 +18,9 @@ mod perft;
 mod pgn;
 mod san;
 mod uci;
+
+#[cfg(all(target_arch = "wasm32", feature = "wasm"))]
+mod wasm;
 
 pub use board::{Bitboard, CastlingRights, Color, Piece, PieceKind, Position, Square};
 pub use draw::RepetitionKey;
