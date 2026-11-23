@@ -13,7 +13,7 @@
 
 <br/>
 
-Rust crate `corvin-chess-core` for Corvin rules. Board representation, legal move generation for standard chess (pins, checks, castling, en passant, promotions), FEN load/store, UCI/SAN/PGN movetext helpers, draw-rule helpers (threefold/fivefold repetition, fifty/seventy-five move, insufficient material), a perft suite against `docs/perft-table.md`, and WASM/TypeScript bindings exposing `legalMoves` for [web](https://github.com/corvin-chess/web) (and other consumers such as [server](https://github.com/corvin-chess/server) and [engine](https://github.com/corvin-chess/engine) via the Rust crate) are built. This library is a leaf dependency with no chess-engine search.
+Rust crate `corvin-chess-core` for Corvin rules. Board representation, legal move generation for standard chess (pins, checks, castling, en passant, promotions), FEN load/store, UCI/SAN/PGN movetext helpers, draw-rule helpers (threefold/fivefold repetition, fifty/seventy-five move, insufficient material), a perft suite against `docs/perft-table.md`, WASM/TypeScript bindings exposing `legalMoves` for [web](https://github.com/corvin-chess/web) (and other consumers such as [server](https://github.com/corvin-chess/server) and [engine](https://github.com/corvin-chess/engine) via the Rust crate), and a fuzz/property CI job over random legal play and parse inputs are built. This library is a leaf dependency with no chess-engine search.
 
 <img src="https://capsule-render.vercel.app/api?type=rect&height=3&color=0:0b0d12,35:8fa3d9,70:c9a227,100:0b0d12" width="100%" alt="" />
 
@@ -21,7 +21,7 @@ Rust crate `corvin-chess-core` for Corvin rules. Board representation, legal mov
 
 <p align="center"><img src="https://readme-typing-svg.demolab.com?font=IBM+Plex+Mono&weight=700&size=18&color=8FA3D9&center=true&vCenter=true&width=420&height=40&duration=1&pause=1000000&letterSpacing=6px&lines=OVERVIEW" alt="Overview" /></p>
 
-Rust crate `corvin-chess-core`. Built: bitboard board representation, starting position, legal move generation, FEN load/store, UCI/SAN/PGN movetext helpers (including ambiguity SAN), draw-rule helpers (repetition keys, threefold/fivefold, fifty/seventy-five move, insufficient material), perft against the published table in `docs/perft-table.md`, and WASM/TypeScript bindings (`legalMoves(fen)` returns UCI strings). Leaf dependency; no search. Consumers include [web](https://github.com/corvin-chess/web), [server](https://github.com/corvin-chess/server), and [engine](https://github.com/corvin-chess/engine).
+Rust crate `corvin-chess-core`. Built: bitboard board representation, starting position, legal move generation, FEN load/store, UCI/SAN/PGN movetext helpers (including ambiguity SAN), draw-rule helpers (repetition keys, threefold/fivefold, fifty/seventy-five move, insufficient material), perft against the published table in `docs/perft-table.md`, WASM/TypeScript bindings (`legalMoves(fen)` returns UCI strings), and fuzz/property tests in CI (`tests/fuzz_property.rs`). Leaf dependency; no search. Consumers include [web](https://github.com/corvin-chess/web), [server](https://github.com/corvin-chess/server), and [engine](https://github.com/corvin-chess/engine).
 
 <img src="https://capsule-render.vercel.app/api?type=rect&height=3&color=0:0b0d12,35:8fa3d9,70:c9a227,100:0b0d12" width="100%" alt="" />
 
@@ -62,12 +62,13 @@ wasm-pack build --target nodejs --out-dir pkg -- --features wasm
 
 ```bash
 cargo test --release
+cargo test --release --test fuzz_property
 wasm-pack build --target nodejs --out-dir pkg -- --features wasm
 node --test tests/wasm/legal_moves.test.mjs
 node scripts/verify-readme.mjs
 ```
 
-Board representation, legal move, FEN, notation, draw-rule, and perft tests cover square indexing, bitboard ops, startpos move count, pins, checks, castling, en passant, promotions, FEN round-trips, UCI round-trips, ambiguity SAN, PGN movetext, repetition counts, fifty-move thresholds, insufficient-material cases, and exact leaf counts from `docs/perft-table.md`. The Node WASM test loads `pkg` and calls `legalMoves` on the start position (expects 20 UCI moves). Use `--release` for the CI perft depths (debug is much slower). Fuzz checks are Planned.
+Board representation, legal move, FEN, notation, draw-rule, and perft tests cover square indexing, bitboard ops, startpos move count, pins, checks, castling, en passant, promotions, FEN round-trips, UCI round-trips, ambiguity SAN, PGN movetext, repetition counts, fifty-move thresholds, insufficient-material cases, and exact leaf counts from `docs/perft-table.md`. The fuzz/property suite plays seeded random legal games (FEN/UCI/SAN round-trips, king counts, `perft(1)` vs `legal_moves`) and feeds random bytes to FEN/UCI/SAN parsers (must not panic). The Node WASM test loads `pkg` and calls `legalMoves` on the start position (expects 20 UCI moves). Use `--release` for the CI perft depths (debug is much slower).
 
 <img src="https://capsule-render.vercel.app/api?type=rect&height=3&color=0:0b0d12,35:8fa3d9,70:c9a227,100:0b0d12" width="100%" alt="" />
 
@@ -75,7 +76,7 @@ Board representation, legal move, FEN, notation, draw-rule, and perft tests cove
 
 <p align="center"><img src="https://readme-typing-svg.demolab.com?font=IBM+Plex+Mono&weight=700&size=18&color=8FA3D9&center=true&vCenter=true&width=420&height=40&duration=1&pause=1000000&letterSpacing=6px&lines=ARCHITECTURE" alt="Architecture" /></p>
 
-Built layout: `src/board` (`square`, `color`, `piece`, `bitboard`, `position`), `src/fen` (six-field FEN load/store), `src/movegen` (`Move`, attacks, legal filter via king-safety), `src/uci`, `src/san`, `src/pgn` (movetext encode/decode), `src/draw` (repetition key, fifty/seventy-five, insufficient material), `src/perft`, `src/wasm` (`legalMoves` via wasm-bindgen, feature `wasm`), and `tests/perft` / `tests/wasm` against `docs/perft-table.md` and the Node package. Rules stay in this crate; search and evaluation belong in [engine](https://github.com/corvin-chess/engine). See organization ADRs and [website](https://github.com/corvin-chess/website) once docs are published.
+Built layout: `src/board` (`square`, `color`, `piece`, `bitboard`, `position`), `src/fen` (six-field FEN load/store), `src/movegen` (`Move`, attacks, legal filter via king-safety), `src/uci`, `src/san`, `src/pgn` (movetext encode/decode), `src/draw` (repetition key, fifty/seventy-five, insufficient material), `src/perft`, `src/wasm` (`legalMoves` via wasm-bindgen, feature `wasm`), `tests/perft` / `tests/wasm` against `docs/perft-table.md` and the Node package, and `tests/fuzz_property` (CI job `fuzz`). Rules stay in this crate; search and evaluation belong in [engine](https://github.com/corvin-chess/engine). See organization ADRs and [website](https://github.com/corvin-chess/website) once docs are published.
 
 <img src="https://capsule-render.vercel.app/api?type=rect&height=3&color=0:0b0d12,35:8fa3d9,70:c9a227,100:0b0d12" width="100%" alt="" />
 
@@ -94,6 +95,7 @@ Built layout: `src/board` (`square`, `color`, `piece`, `bitboard`, `position`), 
 | Draw helpers | Built |
 | Perft suite | Built |
 | WASM + TS bindings | Built |
+| Fuzz / property CI | Built |
 | Implementation | Planned |
 
 <img src="https://capsule-render.vercel.app/api?type=rect&height=3&color=0:0b0d12,35:8fa3d9,70:c9a227,100:0b0d12" width="100%" alt="" />

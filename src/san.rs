@@ -97,6 +97,7 @@ impl Position {
             return Err(SanError::Invalid);
         }
 
+        // Matched starters are ASCII, so index 1 is always a char boundary.
         let (kind, rest) = match bytes[0] {
             b'N' => (PieceKind::Knight, &core[1..]),
             b'B' => (PieceKind::Bishop, &core[1..]),
@@ -108,7 +109,8 @@ impl Position {
         };
 
         let rest = rest.trim_start_matches('x');
-        if rest.len() < 2 {
+        // Destination must be two ASCII algebraic chars; reject mid-codepoint splits.
+        if rest.len() < 2 || !rest.is_char_boundary(rest.len() - 2) {
             return Err(SanError::Invalid);
         }
 
