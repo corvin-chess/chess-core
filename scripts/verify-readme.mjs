@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * CV-013: assert chess-core README matches README_STYLE repository template rules.
+ * Assert chess-core README matches README_STYLE repository template rules (CV-013/CV-100).
  */
 import { readFileSync, existsSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
@@ -20,8 +20,9 @@ const LICENSE_ID = "AGPL-3.0-or-later"
 const CLOSING =
   "Rules without shortcuts: every legal move, every draw claim, every check."
 
+const BUILT_AREAS = /^(README|Crate scaffold|Board representation)$/i
 const PLANNED_AREAS =
-  /^(Crate scaffold|Legal move generation|FEN\/PGN\/SAN\/UCI|Perft suite|WASM \+ TS bindings|Implementation)$/i
+  /^(Legal move generation|FEN\/PGN\/SAN\/UCI|Perft suite|WASM \+ TS bindings|Implementation)$/i
 
 const fail = (msg) => {
   console.error(`FAIL: ${msg}`)
@@ -151,6 +152,8 @@ if (!statusTableMatch) {
   const table = statusTableMatch[0]
   const stateCells = [...table.matchAll(/\|\s*([^|\n]+)\s*\|\s*([^|\n]+)\s*\|/g)]
   let sawReadmeBuilt = false
+  let sawScaffoldBuilt = false
+  let sawBoardBuilt = false
   let sawImplPlanned = false
   for (const [, areaRaw, stateRaw] of stateCells) {
     const area = areaRaw.trim()
@@ -161,8 +164,17 @@ if (!statusTableMatch) {
       fail(`STATUS row "${area}" must be Planned or Built; got "${state}"`)
       continue
     }
+    if (BUILT_AREAS.test(area) && !/^Built$/i.test(state)) {
+      fail(`STATUS row "${area}" must be Built; got "${state}"`)
+    }
     if (/^README$/i.test(area) && /^Built$/i.test(state)) {
       sawReadmeBuilt = true
+    }
+    if (/^Crate scaffold$/i.test(area) && /^Built$/i.test(state)) {
+      sawScaffoldBuilt = true
+    }
+    if (/^Board representation$/i.test(area) && /^Built$/i.test(state)) {
+      sawBoardBuilt = true
     }
     if (PLANNED_AREAS.test(area) && !/^Planned$/i.test(state)) {
       fail(`STATUS row "${area}" must stay Planned until code exists; got "${state}"`)
@@ -172,6 +184,8 @@ if (!statusTableMatch) {
     }
   }
   if (!sawReadmeBuilt) fail('STATUS must include "| README | Built |"')
+  if (!sawScaffoldBuilt) fail('STATUS must include "| Crate scaffold | Built |"')
+  if (!sawBoardBuilt) fail('STATUS must include "| Board representation | Built |"')
   if (!sawImplPlanned) fail('STATUS must include "| Implementation | Planned |"')
   if (!process.exitCode) ok("STATUS rows use Planned/Built correctly")
 }
@@ -183,17 +197,23 @@ if (claimedBuilt.test(readme)) {
   ok("no unverified strength/production claims")
 }
 
-// Body must not claim implementation exists
-const forbiddenImpl = /\b(npm run|pnpm|yarn|cargo |docker compose up)\b/i
+// Cargo commands are documented for the built scaffold; reject other package managers as "shipped".
+const forbiddenImpl = /\b(npm run|pnpm|yarn|docker compose up)\b/i
 if (forbiddenImpl.test(readme) && !/Planned/i.test(readme)) {
   fail("run commands present without Planned framing")
+}
+
+if (!readme.includes("cargo test")) {
+  fail("GETTING STARTED / TESTING must document cargo test")
+} else {
+  ok("cargo test documented")
 }
 
 const linkRe = /https:\/\/github\.com\/corvin-chess\/([A-Za-z0-9._-]+)/g
 const linked = new Set()
 let m
 while ((m = linkRe.exec(readme)) !== null) {
-  linked.add(m[1])
+  linked.add(m[1].replace(/\.git$/i, ""))
 }
 
 const knownRepos = new Set([
@@ -283,5 +303,5 @@ for (const bit of requiredHeaderBits) {
 if (!process.exitCode) ok("header, footer, license heading present")
 
 if (!process.exitCode) {
-  console.log("All CV-013 chess-core README checks passed.")
+  console.log("All chess-core README checks passed.")
 }
