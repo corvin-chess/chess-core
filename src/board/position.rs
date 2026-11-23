@@ -31,7 +31,7 @@ impl CastlingRights {
     }
 }
 
-/// A chess position without move generation (CV-100).
+/// A chess position: occupancy, side to move, castling, EP, and clocks.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Position {
     by_color: [Bitboard; 2],
@@ -265,5 +265,25 @@ impl Position {
         for kind in PieceKind::ALL {
             self.by_kind[kind.index()].clear(square);
         }
+    }
+
+    pub fn set_side_to_move(&mut self, color: Color) {
+        self.side_to_move = color;
+    }
+
+    pub fn set_castling(&mut self, rights: CastlingRights) {
+        self.castling = rights;
+    }
+
+    pub fn set_ep_square(&mut self, square: Option<Square>) {
+        self.ep_square = square;
+    }
+
+    pub fn set_halfmove_clock(&mut self, clock: u16) {
+        self.halfmove_clock = clock;
+    }
+
+    pub fn set_fullmove_number(&mut self, number: u16) {
+        self.fullmove_number = number;
     }
 }
