@@ -21,7 +21,7 @@ const CLOSING =
   "Rules without shortcuts: every legal move, every draw claim, every check."
 
 const BUILT_AREAS =
-  /^(README|Crate scaffold|Board representation|Legal move generation|FEN load\/store|PGN\/SAN\/UCI|Draw helpers|Perft suite|WASM \+ TS bindings)$/i
+  /^(README|Crate scaffold|Board representation|Legal move generation|FEN load\/store|PGN\/SAN\/UCI|Draw helpers|Perft suite|WASM \+ TS bindings|Fuzz \/ property CI)$/i
 const PLANNED_AREAS =
   /^(Implementation)$/i
 
@@ -161,6 +161,7 @@ if (!statusTableMatch) {
   let sawDrawBuilt = false
   let sawPerftBuilt = false
   let sawWasmBuilt = false
+  let sawFuzzBuilt = false
   let sawImplPlanned = false
   for (const [, areaRaw, stateRaw] of stateCells) {
     const area = areaRaw.trim()
@@ -201,6 +202,9 @@ if (!statusTableMatch) {
     if (/^WASM \+ TS bindings$/i.test(area) && /^Built$/i.test(state)) {
       sawWasmBuilt = true
     }
+    if (/^Fuzz \/ property CI$/i.test(area) && /^Built$/i.test(state)) {
+      sawFuzzBuilt = true
+    }
     if (PLANNED_AREAS.test(area) && !/^Planned$/i.test(state)) {
       fail(`STATUS row "${area}" must stay Planned until code exists; got "${state}"`)
     }
@@ -217,6 +221,7 @@ if (!statusTableMatch) {
   if (!sawDrawBuilt) fail('STATUS must include "| Draw helpers | Built |"')
   if (!sawPerftBuilt) fail('STATUS must include "| Perft suite | Built |"')
   if (!sawWasmBuilt) fail('STATUS must include "| WASM + TS bindings | Built |"')
+  if (!sawFuzzBuilt) fail('STATUS must include "| Fuzz / property CI | Built |"')
   if (!sawImplPlanned) fail('STATUS must include "| Implementation | Planned |"')
   if (!process.exitCode) ok("STATUS rows use Planned/Built correctly")
 }

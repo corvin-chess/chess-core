@@ -38,3 +38,12 @@ jobs:
         run: node --test tests/wasm/legal_moves.test.mjs
       - name: Verify README
         run: node scripts/verify-readme.mjs
+
+  # Dedicated fuzz/property job (CV-107). Required on main alongside verify.
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Fuzz / property tests
+        run: cargo test --locked --release --test fuzz_property
